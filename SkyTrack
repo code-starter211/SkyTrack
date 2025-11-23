@@ -1,0 +1,1031 @@
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>SkyTrack - Real-Time Flight Tracking</title>  
+    <style>  
+        * {  
+            margin: 0;  
+            padding: 0;  
+            box-sizing: border-box;  
+        }  body {  
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+        line-height: 1.6;  
+        color: #333;  
+    }  
+
+    /* Navigation */  
+    nav {  
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);  
+        padding: 1rem 0;  
+        position: sticky;  
+        top: 0;  
+        z-index: 1000;  
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);  
+    }  
+
+    .nav-container {  
+        max-width: 1200px;  
+        margin: 0 auto;  
+        display: flex;  
+        justify-content: space-between;  
+        align-items: center;  
+        padding: 0 2rem;  
+    }  
+
+    .logo {  
+        font-size: 1.8rem;  
+        font-weight: bold;  
+        color: white;  
+        display: flex;  
+        align-items: center;  
+        gap: 0.5rem;  
+    }  
+
+    .logo-icon {  
+        width: 40px;  
+        height: 40px;  
+        background: white;  
+        border-radius: 50%;  
+        display: flex;  
+        align-items: center;  
+        justify-content: center;  
+        font-size: 1.5rem;  
+    }  
+
+    .nav-links {  
+        display: flex;  
+        gap: 2rem;  
+        list-style: none;  
+    }  
+
+    .nav-links a {  
+        color: white;  
+        text-decoration: none;  
+        font-weight: 500;  
+        transition: opacity 0.3s;  
+    }  
+
+    .nav-links a:hover {  
+        opacity: 0.8;  
+    }  
+
+    .hamburger {  
+        display: none;  
+        flex-direction: column;  
+        cursor: pointer;  
+        gap: 5px;  
+    }  
+
+    .hamburger span {  
+        width: 25px;  
+        height: 3px;  
+        background: white;  
+        transition: all 0.3s;  
+        border-radius: 3px;  
+    }  
+
+    .hamburger.active span:nth-child(1) {  
+        transform: rotate(45deg) translate(8px, 8px);  
+    }  
+
+    .hamburger.active span:nth-child(2) {  
+        opacity: 0;  
+    }  
+
+    .hamburger.active span:nth-child(3) {  
+        transform: rotate(-45deg) translate(7px, -7px);  
+    }  
+
+/* MOBILE HAMBURGER MENU */
+@media (max-width: 768px) {
+
+    .nav-links {
+        position: absolute;
+        top: 70px;
+        right: 0;
+        background: #1e3c72;
+        width: 100%;
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem 0;
+        gap: 1.5rem;
+        display: none;   /* ✅ Hide menu */
+    }
+
+    .nav-links.active {
+        display: flex;  /* ✅ Show menu when hamburger clicked */
+    }
+
+    .hamburger {
+        display: flex;  /* ✅ Show hamburger on mobile */
+    }
+}
+    /* Hero Section */  
+    .hero {  
+        background: linear-gradient(rgba(30, 60, 114, 0.7), rgba(42, 82, 152, 0.7)),  
+                    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%231e3c72" width="1200" height="600"/><path fill="%232a5298" d="M0 300L50 283.3C100 266.7 200 233.3 300 233.3C400 233.3 500 266.7 600 283.3C700 300 800 300 900 283.3C1000 266.7 1100 233.3 1150 216.7L1200 200V600H1150C1100 600 1000 600 900 600C800 600 700 600 600 600C500 600 400 600 300 600C200 600 100 600 50 600H0V300Z"/></svg>');  
+        background-size: cover;  
+        background-position: center;  
+        color: white;  
+        padding: 8rem 2rem 6rem;  
+        text-align: center;  
+    }  
+
+    .hero h1 {  
+        font-size: 3rem;  
+        margin-bottom: 1rem;  
+        animation: fadeInUp 0.8s ease-out;  
+    }  
+
+    .hero p {  
+        font-size: 1.3rem;  
+        margin-bottom: 3rem;  
+        opacity: 0.95;  
+        animation: fadeInUp 0.8s ease-out 0.2s backwards;  
+    }  
+
+    /* Flight Tracking Form */  
+    .tracking-form {  
+        max-width: 700px;  
+        margin: 0 auto;  
+        background: white;  
+        padding: 2.5rem;  
+        border-radius: 15px;  
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);  
+        animation: fadeInUp 0.8s ease-out 0.4s backwards;  
+    }  
+
+    .form-group {  
+        display: grid;  
+        grid-template-columns: 1fr 1fr;  
+        gap: 1rem;  
+        margin-bottom: 1.5rem;  
+    }  
+
+    .form-group input {  
+        width: 100%;  
+        padding: 1rem;  
+        border: 2px solid #e0e0e0;  
+        border-radius: 8px;  
+        font-size: 1rem;  
+        transition: border-color 0.3s;  
+        box-sizing: border-box;  
+    }  
+
+    .form-group input:focus {  
+        outline: none;  
+        border-color: #2a5298;  
+    }  
+
+    .track-btn {  
+        width: 100%;  
+        padding: 1.2rem;  
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);  
+        color: white;  
+        border: none;  
+        border-radius: 8px;  
+        font-size: 1.1rem;  
+        font-weight: 600;  
+        cursor: pointer;  
+        transition: transform 0.3s, box-shadow 0.3s;  
+    }  
+
+    .track-btn:hover {  
+        transform: translateY(-2px);  
+        box-shadow: 0 5px 20px rgba(42, 82, 152, 0.4);  
+    }  
+
+    .error-message {  
+        color: #d32f2f;  
+        margin-top: 1rem;  
+        text-align: center;  
+        font-weight: 500;  
+        display: none;  
+    }  
+
+    /* Flight Results */  
+    .results-section {  
+        max-width: 1200px;  
+        margin: 4rem auto;  
+        padding: 0 2rem;  
+        display: none;  
+    }  
+
+    .flight-card {  
+        background: white;  
+        border-radius: 15px;  
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1);  
+        padding: 2.5rem;  
+        animation: slideIn 0.5s ease-out;  
+    }  
+
+    .flight-header {  
+        display: flex;  
+        justify-content: space-between;  
+        align-items: center;  
+        margin-bottom: 2rem;  
+        padding-bottom: 1.5rem;  
+        border-bottom: 2px solid #f0f0f0;  
+    }  
+
+    .flight-number {  
+        font-size: 1.8rem;  
+        font-weight: bold;  
+        color: #1e3c72;  
+    }  
+
+    .status-badge {  
+        padding: 0.6rem 1.5rem;  
+        border-radius: 25px;  
+        font-weight: 600;  
+        font-size: 0.9rem;  
+    }  
+
+    .status-ontime {  
+        background: #4caf50;  
+        color: white;  
+    }  
+
+    .status-delayed {  
+        background: #ff9800;  
+        color: white;  
+    }  
+
+    .status-canceled {  
+        background: #f44336;  
+        color: white;  
+    }  
+
+    .flight-route {  
+        display: grid;  
+        grid-template-columns: 1fr auto 1fr;  
+        gap: 2rem;  
+        align-items: center;  
+        margin-bottom: 2rem;  
+    }  
+
+    .airport-info {  
+        text-align: center;  
+    }  
+
+    .airport-code {  
+        font-size: 2.5rem;  
+        font-weight: bold;  
+        color: #1e3c72;  
+        margin-bottom: 0.5rem;  
+    }  
+
+    .airport-name {  
+        color: #666;  
+        font-size: 0.95rem;  
+    }  
+
+    .time {  
+        font-size: 1.3rem;  
+        margin-top: 0.5rem;  
+        color: #333;  
+    }  
+
+    .flight-path {  
+        display: flex;  
+        flex-direction: column;  
+        align-items: center;  
+        gap: 0.5rem;  
+    }  
+
+    .plane-icon {  
+        font-size: 2rem;  
+        color: #2a5298;  
+    }  
+
+    .duration {  
+        color: #666;  
+        font-size: 0.9rem;  
+    }  
+
+    .dotted-line {  
+        width: 100%;  
+        height: 2px;  
+        background: repeating-linear-gradient(to right, #ccc 0, #ccc 10px, transparent 10px, transparent 20px);  
+    }  
+
+    .flight-details {  
+        display: grid;  
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));  
+        gap: 1.5rem;  
+        margin-top: 2rem;  
+        padding-top: 2rem;  
+        border-top: 2px solid #f0f0f0;  
+    }  
+
+    .detail-item {  
+        text-align: center;  
+    }  
+
+    .detail-label {  
+        color: #666;  
+        font-size: 0.9rem;  
+        margin-bottom: 0.3rem;  
+    }  
+
+    .detail-value {  
+        font-size: 1.2rem;  
+        font-weight: 600;  
+        color: #1e3c72;  
+    }  
+
+    /* About Section */  
+    .about-section {  
+        background: #f8f9fa;  
+        padding: 5rem 2rem;  
+    }  
+
+    .about-content {  
+        max-width: 1000px;  
+        margin: 0 auto;  
+        text-align: center;  
+    }  
+
+    .about-content h2 {  
+        font-size: 2.5rem;  
+        color: #1e3c72;  
+        margin-bottom: 1.5rem;  
+    }  
+
+    .about-content p {  
+        font-size: 1.1rem;  
+        color: #666;  
+        line-height: 1.8;  
+        margin-bottom: 1rem;  
+    }  
+
+    /* FAQ Section */  
+    .faq-section {  
+        max-width: 900px;  
+        margin: 5rem auto;  
+        padding: 0 2rem;  
+    }  
+
+    .faq-section h2 {  
+        font-size: 2.5rem;  
+        color: #1e3c72;  
+        text-align: center;  
+        margin-bottom: 3rem;  
+    }  
+
+    .faq-item {  
+        background: white;  
+        border-radius: 10px;  
+        padding: 1.5rem;  
+        margin-bottom: 1rem;  
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);  
+    }  
+
+    .faq-item h3 {  
+        color: #1e3c72;  
+        margin-bottom: 0.5rem;  
+    }  
+
+    .faq-item p {  
+        color: #666;  
+        line-height: 1.6;  
+    }  
+
+    /* Contact Section */  
+    .contact-section {  
+        background: #f8f9fa;  
+        padding: 5rem 2rem;  
+    }  
+
+    .contact-content {  
+        max-width: 600px;  
+        margin: 0 auto;  
+    }  
+
+    .contact-content h2 {  
+        font-size: 2.5rem;  
+        color: #1e3c72;  
+        text-align: center;  
+        margin-bottom: 2rem;  
+    }  
+
+    .contact-form {  
+        background: white;  
+        padding: 2.5rem;  
+        border-radius: 15px;  
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1);  
+    }  
+
+    .contact-form input,  
+    .contact-form textarea {  
+        width: 100%;  
+        padding: 1rem;  
+        margin-bottom: 1rem;  
+        border: 2px solid #e0e0e0;  
+        border-radius: 8px;  
+        font-size: 1rem;  
+        font-family: inherit;  
+    }  
+
+    .contact-form textarea {  
+        resize: vertical;  
+        min-height: 150px;  
+    }  
+
+    .contact-form button {  
+        width: 100%;  
+        padding: 1.2rem;  
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);  
+        color: white;  
+        border: none;  
+        border-radius: 8px;  
+        font-size: 1.1rem;  
+        font-weight: 600;  
+        cursor: pointer;  
+        transition: transform 0.3s;  
+    }  
+
+    .contact-form button:hover {  
+        transform: translateY(-2px);  
+    }  
+
+    /* Footer */  
+    footer {  
+        background: #1e3c72;  
+        color: white;  
+        padding: 3rem 2rem 1.5rem;  
+    }  
+
+    .footer-content {  
+        max-width: 1200px;  
+        margin: 0 auto;  
+        display: grid;  
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));  
+        gap: 2rem;  
+        margin-bottom: 2rem;  
+    }  
+
+    .footer-section h3 {  
+        margin-bottom: 1rem;  
+    }  
+
+    .footer-section ul {  
+        list-style: none;  
+    }  
+
+    .footer-section ul li {  
+        margin-bottom: 0.5rem;  
+    }  
+
+    .footer-section a {  
+        color: rgba(255,255,255,0.8);  
+        text-decoration: none;  
+        transition: color 0.3s;  
+    }  
+
+    .footer-section a:hover {  
+        color: white;  
+    }  
+
+    .social-icons {  
+        display: flex;  
+        gap: 1rem;  
+        font-size: 1.5rem;  
+    }  
+
+    .footer-bottom {  
+        text-align: center;  
+        padding-top: 2rem;  
+        border-top: 1px solid rgba(255,255,255,0.1);  
+        color: rgba(255,255,255,0.7);  
+    }  
+
+    /* Animations */  
+    @keyframes fadeInUp {  
+        from {  
+            opacity: 0;  
+            transform: translateY(30px);  
+        }  
+        to {  
+            opacity: 1;  
+            transform: translateY(0);  
+        }  
+    }  
+
+    @keyframes slideIn {  
+        from {  
+            opacity: 0;  
+            transform: translateX(-30px);  
+        }  
+        to {  
+            opacity: 1;  
+            transform: translateX(0);  
+        }  
+    }  
+
+    /* Responsive */  
+    @media (max-width: 768px) {  
+        .nav-links {  
+            gap: 1rem;  
+        }  
+
+        .hero h1 {  
+            font-size: 2rem;  
+        }  
+
+        .hero p {  
+            font-size: 1rem;  
+        }  
+
+        .form-group {  
+            grid-template-columns: 1fr;  
+        }  
+
+        .flight-route {  
+            grid-template-columns: 1fr;  
+            gap: 1rem;  
+        }  
+
+        .airport-code {  
+            font-size: 2rem;  
+        }  
+
+        .flight-details {  
+            grid-template-columns: 1fr;  
+        }  
+    }  
+    
+    .status-canceled {
+    background: #f44336;
+    color: white;
+}
+</style>
+
+</head>  
+<body>  
+    <!-- Navigation -->
+
+    <nav>  
+        <div class="nav-container">  
+            <div class="logo">  
+                <div class="logo-icon">✈️</div>  
+                SkyTrack  
+            </div>  
+            <div class="hamburger" id="hamburger">  
+                <span></span>  
+                <span></span>  
+                <span></span>  
+            </div>  
+            <ul class="nav-links" id="navLinks">  
+                <li><a href="#home">Home</a></li>  
+                <li><a href="#track">Track Flight</a></li>  
+                <li><a href="#about">About</a></li>  
+                <li><a href="#contact">Contact</a></li>  
+            </ul>  
+        </div>  
+    </nav>  
+    
+
+<section class="hero" id="home">  
+    <h1>Track Your Flight in Real-Time</h1>  
+    <p>Enter your booking number and last name to get flight details instantly</p>  
+      
+    <div class="tracking-form">  
+        <form id="trackingForm">  
+            <div class="form-group">  
+                <input type="text" id="pnr" placeholder="Booking Number (PNR)" required>  
+                <input type="text" id="lastName" placeholder="Last Name" required>  
+            </div>  
+            <button type="submit" class="track-btn">Track Flight</button>  
+            <div class="error-message" id="errorMessage">Flight not found. Please check your details and try again.</div>  
+        </form>  
+    </div>  
+</section>  
+
+<!-- Flight Results Section -->  
+<section class="results-section" id="results">  
+    <div class="flight-card" id="flightCard">  
+        <!-- Flight details will be inserted here -->  
+    </div>  
+</section>  
+
+<!-- About Section -->  
+<section class="about-section" id="about">  
+    <div class="about-content">  
+        <h2>About SkyTrack</h2>  
+        <p>SkyTrack is your trusted companion for real-time flight tracking. We provide accurate, up-to-date information on flights worldwide, helping travelers stay informed and connected.</p>  
+        <p>Our advanced tracking system monitors thousands of flights daily, giving you instant access to departure times, arrival information, gate details, and flight status updates.</p>  
+        <p>Whether you're a frequent flyer, picking up loved ones, or simply curious about flight information, SkyTrack delivers the data you need with precision and reliability.</p>  
+    </div>  
+</section>  
+
+<!-- FAQ Section -->  
+<section class="faq-section">  
+    <h2>Frequently Asked Questions</h2>  
+      
+    <div class="faq-item">  
+        <h3>How do I track my flight?</h3>  
+        <p>Simply enter your booking number (PNR) and last name in the tracking form above. Our system will instantly retrieve your flight details.</p>  
+    </div>  
+      
+    <div class="faq-item">  
+        <h3>How often is flight information updated?</h3>  
+        <p>Flight information is updated in real-time. Any changes to your flight status, gate, or timing will be reflected immediately.</p>  
+    </div>  
+      
+    <div class="faq-item">  
+        <h3>What should I do if my flight is delayed?</h3>  
+        <p>Contact your airline directly for rebooking options. Most airlines will automatically rebook you on the next available flight or provide compensation according to their policies.</p>  
+    </div>  
+      
+    <div class="faq-item">  
+        <h3>Can I track international flights?</h3>  
+        <p>Yes! SkyTrack supports tracking for both domestic and international flights across all major airlines worldwide.</p>  
+    </div>  
+</section>  
+
+<!-- Contact Section -->  
+<section class="contact-section" id="contact">  
+    <div class="contact-content">  
+        <h2>Contact Us</h2>  
+        <form class="contact-form" id="contactForm">  
+            <input type="text" placeholder="Your Name" required>  
+            <input type="email" placeholder="Your Email" required>  
+            <input type="text" placeholder="Subject" required>  
+            <textarea placeholder="Your Message" required></textarea>  
+            <button type="submit">Send Message</button>  
+        </form>  
+    </div>  
+</section>  
+
+<!-- Footer -->  
+<footer>  
+    <div class="footer-content">  
+        <div class="footer-section">  
+            <h3>SkyTrack</h3>  
+            <p>Your trusted flight tracking companion. Real-time updates, anywhere, anytime.</p>  
+        </div>  
+          
+        <div class="footer-section">  
+            <h3>Quick Links</h3>  
+            <ul>  
+                <li><a href="#home">Home</a></li>  
+                <li><a href="#track">Track Flight</a></li>  
+                <li><a href="#about">About Us</a></li>  
+                <li><a href="#contact">Contact</a></li>  
+            </ul>  
+        </div>  
+          
+        <div class="footer-section">  
+            <h3>Legal</h3>  
+            <ul>  
+                <li><a href="#">Privacy Policy</a></li>  
+                <li><a href="#">Terms of Service</a></li>  
+                <li><a href="#">Cookie Policy</a></li>  
+            </ul>  
+        </div>  
+          
+        <div class="footer-section">  
+            <h3>Follow Us</h3>  
+            <div class="social-icons">  
+                <a href="#">📘</a>  
+                <a href="#">🐦</a>  
+                <a href="#">📷</a>  
+                <a href="#">💼</a>  
+            </div>  
+        </div>  
+    </div>  
+      
+    <div class="footer-bottom">  
+        <p>&copy; 2024 SkyTrack. All rights reserved.</p>  
+    </div>  
+</footer>  
+
+<script>  
+    // Hamburger menu toggle  
+    const hamburger = document.getElementById('hamburger');  
+    const navLinks = document.getElementById('navLinks');  
+
+    hamburger.addEventListener('click', () => {  
+        hamburger.classList.toggle('active');  
+        navLinks.classList.toggle('active');  
+    });  
+
+    // Close menu when clicking on a link  
+    document.querySelectorAll('.nav-links a').forEach(link => {  
+        link.addEventListener('click', () => {  
+            hamburger.classList.remove('active');  
+            navLinks.classList.remove('active');  
+        });  
+    });  
+
+    // Close menu when clicking outside  
+    document.addEventListener('click', (e) => {  
+        if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {  
+            hamburger.classList.remove('active');  
+            navLinks.classList.remove('active');  
+        }  
+    });  
+
+    // Mock flight database  
+    const flightDatabase = {  
+        'ABC12556-SMITH': {  
+            flightNumber: 'UN 4492',  
+            airline: 'United Airlines',  
+            departure: {  
+                airport: 'JFK',  
+                city: 'John F. Kennedy International',  
+                time: '14:30'  
+            },  
+            arrival: {  
+                airport: 'LAX',  
+                city: 'Los Angeles International',  
+                time: '17:45'  
+            },  
+            status: 'ontime',  
+            gate: 'B24',  
+            terminal: 'Terminal 4',  
+            aircraft: 'Boeing 737-800',  
+            duration: '5h 15m',  
+            price: '$342'  
+        },  
+        
+        
+        'XYZ789-JOHNSON': {  
+            flightNumber: 'ST 5678',  
+            airline: 'SkyTrack Airlines',  
+            departure: {  
+                airport: 'ORD',  
+                city: 'Chicago O\'Hare International',  
+                time: '09:15'  
+            },  
+            arrival: {  
+                airport: 'MIA',  
+                city: 'Miami International',  
+                time: '13:30'  
+            },  
+            status: 'delayed',  
+            gate: 'C12',  
+            terminal: 'Terminal 2',  
+            aircraft: 'Airbus A320',  
+            duration: '3h 15m',  
+            price: '$289'  
+        },  
+        
+        'DEF456-WILLIAMS': {  
+            flightNumber: 'ST 9012',  
+            airline: 'SkyTrack Airlines',  
+            departure: {  
+                airport: 'SFO',  
+                city: 'San Francisco International',  
+                time: '18:00'  
+            },  
+            arrival: {  
+                airport: 'SEA',  
+                city: 'Seattle-Tacoma International',  
+                time: '20:15'  
+            },  
+            status: 'Canceled',  
+            gate: 'A8',  
+            terminal: 'Terminal 1',  
+            aircraft: 'Boeing 787',  
+            duration: '2h 15m',  
+            price: '$195'  
+        },  
+        
+        
+        'CNL789-WATSON': {
+  flightNumber: 'EX 1234',
+  airline: 'Example Airlines',
+  departure: { airport: 'ATL', city: 'Atlanta International', time: '16:00' },
+  arrival: { airport: 'MCO', city: 'Orlando International', time: '17:30' },
+  status: 'delayed',
+  gate: 'E7',
+  terminal: 'Terminal 1',
+  aircraft: 'Embraer 190',
+  duration: '1h 30m',
+  price: '$150'
+},
+
+'XYZ780-CHLOE MARY': {
+  flightNumber: 'UA 5412',
+  airline: 'United Airlines',
+  status: 'ontime',
+  segments: [
+    {
+      departure: { 
+        airport: 'FAT', 
+        city: 'Fresno Yosemite International Airport', 
+        time: '07:30 AM' 
+      },
+      arrival: { 
+        airport: 'DEN', 
+        city: 'Denver International Airport', 
+        time: '09:55 AM' 
+      },
+      duration: '2h 25m',
+      gate: 'D5',
+      terminal: 'Terminal 4',
+      aircraft: 'Airbus A319'
+    },
+    {
+      departure: { 
+        airport: 'DEN', 
+        city: 'Denver International Airport', 
+        time: '12:55 PM' 
+      },
+      arrival: { 
+        airport: 'YHZ', 
+        city: 'Halifax Stanfield International Airport', 
+        time: '18:10 PM' 
+      },
+      duration: '5h 15m',
+      gate: 'E3',
+      terminal: 'Terminal 2',
+      aircraft: 'Airbus A320'
+    }
+  ],
+  duration: '7h 40m',
+  price: '$1,130'
+}
+
+};
+    
+    
+    
+    
+    // Form submission handler  
+    document.getElementById('trackingForm').addEventListener('submit', function(e) {  
+        e.preventDefault();  
+          
+        const pnr = document.getElementById('pnr').value.toUpperCase();  
+        const lastName = document.getElementById('lastName').value.toUpperCase();  
+        const searchKey = `${pnr}-${lastName}`;  
+          
+        const errorMessage = document.getElementById('errorMessage');  
+        const resultsSection = document.querySelector('.results-section');  
+          
+        if (flightDatabase[searchKey]) {  
+            // Hide error message  
+            errorMessage.style.display = 'none';  
+              
+            // Display flight results  
+            displayFlightResults(flightDatabase[searchKey]);  
+              
+            // Scroll to results  
+            resultsSection.style.display = 'block';  
+            setTimeout(() => {  
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });  
+            }, 100);  
+        } else {  
+            // Show error message  
+            errorMessage.style.display = 'block';  
+            resultsSection.style.display = 'none';  
+        }  
+    });  
+
+function displayFlightResults(flight) {
+    const statusClass = `status-${flight.status.toLowerCase()}`;
+    const statusText = flight.status.toLowerCase() === 'ontime' ? 'On Time' :
+                       flight.status.toLowerCase() === 'delayed' ? 'Delayed' :
+                       flight.status.toLowerCase() === 'canceled' ? 'Canceled' : 'Unknown';
+
+    const flightCard = document.getElementById('flightCard');
+
+    // If flight has segments (layover), display each segment
+    if (flight.segments && Array.isArray(flight.segments)) {
+        let segmentsHtml = '';
+        flight.segments.forEach((segment, idx) => {
+            segmentsHtml += `
+                <div class="flight-segment">
+                    <div class="flight-route">  
+                        <div class="airport-info">  
+                            <div class="airport-code">${segment.departure.airport}</div>  
+                            <div class="airport-name">${segment.departure.city}</div>  
+                            <div class="time">${segment.departure.time}</div>  
+                        </div>  
+                        <div class="flight-path">  
+                            <div class="plane-icon">✈️</div>  
+                            <div class="dotted-line"></div>  
+                            <div class="duration">${segment.duration || ''}</div>  
+                        </div>  
+                        <div class="airport-info">  
+                            <div class="airport-code">${segment.arrival.airport}</div>  
+                            <div class="airport-name">${segment.arrival.city}</div>  
+                            <div class="time">${segment.arrival.time}</div>  
+                        </div>  
+                    </div>  
+                    <div class="flight-details">  
+                        <div class="detail-item">  
+                            <div class="detail-label">Gate</div>  
+                            <div class="detail-value">${segment.gate || '-'}</div>  
+                        </div>  
+                        <div class="detail-item">  
+                            <div class="detail-label">Terminal</div>  
+                            <div class="detail-value">${segment.terminal || '-'}</div>  
+                        </div>  
+                        <div class="detail-item">  
+                            <div class="detail-label">Aircraft</div>  
+                            <div class="detail-value">${segment.aircraft || '-'}</div>  
+                        </div>  
+                    </div>
+                    ${idx < flight.segments.length - 1 ? `<hr style="margin:1rem 0; border-top: 1px dotted #ccc;">` : ''}
+                </div>
+            `;
+        });
+
+        flightCard.innerHTML = `
+            <div class="flight-header">  
+                <div>  
+                    <div class="flight-number">${flight.flightNumber || 'Multiple Segments'}</div>  
+                    <div style="color: #666; margin-top: 0.3rem;">${flight.airline}</div>  
+                </div>  
+                <div class="status-badge ${statusClass}">${statusText}</div>  
+            </div>
+            ${segmentsHtml}
+            <div class="flight-details" style="margin-top: 1rem; border-top: 2px solid #f0f0f0; padding-top: 1rem;">
+                <div class="detail-item">  
+                    <div class="detail-label">Duration</div>  
+                    <div class="detail-value">${flight.duration}</div>  
+                </div>  
+                <div class="detail-item">  
+                    <div class="detail-label">Price</div>  
+                    <div class="detail-value">${flight.price}</div>  
+                </div>  
+            </div>
+        `;
+    } else {
+        // Existing single segment display for flights without layovers
+        flightCard.innerHTML = `  
+            <div class="flight-header">  
+                <div>  
+                    <div class="flight-number">${flight.flightNumber}</div>  
+                    <div style="color: #666; margin-top: 0.3rem;">${flight.airline}</div>  
+                </div>  
+                <div class="status-badge ${statusClass}">${statusText}</div>  
+            </div>  
+              
+            <div class="flight-route">  
+                <div class="airport-info">  
+                    <div class="airport-code">${flight.departure.airport}</div>  
+                    <div class="airport-name">${flight.departure.city}</div>  
+                    <div class="time">${flight.departure.time}</div>  
+                </div>  
+                  
+                <div class="flight-path">  
+                    <div class="plane-icon">✈️</div>  
+                    <div class="dotted-line"></div>  
+                    <div class="duration">${flight.duration}</div>  
+                </div>  
+                  
+                <div class="airport-info">  
+                    <div class="airport-code">${flight.arrival.airport}</div>  
+                    <div class="airport-name">${flight.arrival.city}</div>  
+                    <div class="time">${flight.arrival.time}</div>  
+                </div>  
+            </div>  
+              
+            <div class="flight-details">  
+                <div class="detail-item">  
+                    <div class="detail-label">Gate</div>  
+                    <div class="detail-value">${flight.gate}</div>  
+                </div>  
+                <div class="detail-item">  
+                    <div class="detail-label">Terminal</div>  
+                    <div class="detail-value">${flight.terminal}</div>  
+                </div>  
+                <div class="detail-item">  
+                    <div class="detail-label">Aircraft</div>  
+                    <div class="detail-value">${flight.aircraft}</div>  
+                </div>  
+                <div class="detail-item">  
+                    <div class="detail-label">Price</div>  
+                    <div class="detail-value">${flight.price}</div>  
+                </div>  
+            </div>  
+        `;
+    }
+}
+
+    // Contact form handler  
+    document.getElementById('contactForm').addEventListener('submit', function(e) {  
+        e.preventDefault();  
+        alert('Thank you for your message! We will get back to you soon.');  
+        this.reset();  
+    });  
+
+    // Smooth scrolling for navigation links  
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {  
+        anchor.addEventListener('click', function (e) {  
+            e.preventDefault();  
+            const target = document.querySelector(this.getAttribute('href'));  
+            if (target) {  
+                target.scrollIntoView({ behavior: 'smooth' });  
+            }  
+        });  
+    });  
+</script>
+
+</body>  
+</html>
